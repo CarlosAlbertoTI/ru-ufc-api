@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npx tsc",
     "build-js": "npx tsc",
-    "start": "node dist/index.js",
+    "start": "nodemon src/index.ts",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
   },
   "keywords": [],
