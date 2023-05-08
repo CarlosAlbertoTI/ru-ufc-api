@@ -16,7 +16,7 @@ class PuppeteerService implements IScrapping {
     studentId: string,
     studentRuId: string
   ): Promise<responseScrappingServiceMealTicket> {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: true });
     try {
       const page = await browser.newPage();
       await page.setDefaultNavigationTimeout(0);
