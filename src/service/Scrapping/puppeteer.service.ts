@@ -16,7 +16,9 @@ class PuppeteerService implements IScrapping {
     studentId: string,
     studentRuId: string
   ): Promise<responseScrappingServiceMealTicket> {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: true,
+    });
     try {
       const page = await browser.newPage();
       await page.setDefaultNavigationTimeout(0);
@@ -84,15 +86,17 @@ class PuppeteerService implements IScrapping {
     try {
       const page = await browser.newPage();
       await page.setDefaultNavigationTimeout(0);
-      await page.goto("https://www.ufc.br/restaurante/cardapio/1-restaurante-universitario-de-fortaleza", {
-        waitUntil: "networkidle2", // <-- good practice to wait for page to fully load
-      });
+      await page.goto(
+        "https://www.ufc.br/restaurante/cardapio/1-restaurante-universitario-de-fortaleza",
+        {
+          waitUntil: "networkidle2", // <-- good practice to wait for page to fully load
+        }
+      );
 
       // Set screen size
       await page.setViewport({ width: 1080, height: 1024 });
       // await this.delay(2000);
 
-      
       await browser.close();
     } catch (e) {
       await browser.close();
