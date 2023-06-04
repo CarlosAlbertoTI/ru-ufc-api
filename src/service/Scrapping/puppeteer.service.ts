@@ -103,7 +103,7 @@ class PuppeteerService implements IScrapping {
       const page = await browser.newPage();
       await page.setDefaultNavigationTimeout(0);
       await page.goto(
-        "https://www.ufc.br/restaurante/cardapio/1-restaurante-universitario-de-fortaleza/2023-05-11",
+        "https://www.ufc.br/restaurante/cardapio/1-restaurante-universitario-de-fortaleza",
         {
           waitUntil: "networkidle2", // <-- good practice to wait for page to fully load
         }
