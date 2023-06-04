@@ -90,14 +90,14 @@ class PuppeteerService implements IScrapping {
 
   async getMealOfTheDay(): Promise<responseScrappingMealOfTheDay> {
     const browser = await puppeteer.launch({
-      headless: false,
-      // executablePath: "/usr/bin/google-chrome",
-      // args: [
-      //   "--disable-gpu",
-      //   "--disable-dev-shm-usage",
-      //   "--disable-setuid-sandbox",
-      //   "--no-sandbox",
-      // ],
+      headless: true,
+      executablePath: "/usr/bin/google-chrome",
+      args: [
+        "--disable-gpu",
+        "--disable-dev-shm-usage",
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+      ],
     });
     try {
       const page = await browser.newPage();
