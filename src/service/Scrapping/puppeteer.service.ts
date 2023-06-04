@@ -18,7 +18,7 @@ class PuppeteerService implements IScrapping {
   ): Promise<responseScrappingServiceMealTicket> {
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/usr/bin/google-chrome',
+      executablePath: "/usr/bin/google-chrome",
       args: [
         "--disable-gpu",
         "--disable-dev-shm-usage",
@@ -87,14 +87,14 @@ class PuppeteerService implements IScrapping {
     }
     return { error: "", name: "", credits: 0 };
   }
-  // @ts-ignore
+
   async getMealOfTheDay(): Promise<responseScrappingMealOfTheDay> {
     const browser = await puppeteer.launch({ headless: false });
     try {
       const page = await browser.newPage();
       await page.setDefaultNavigationTimeout(0);
       await page.goto(
-        "https://www.ufc.br/restaurante/cardapio/1-restaurante-universitario-de-fortaleza",
+        "https://www.ufc.br/restaurante/cardapio/1-restaurante-universitario-de-fortaleza/2023-05-11",
         {
           waitUntil: "networkidle2", // <-- good practice to wait for page to fully load
         }
@@ -104,10 +104,67 @@ class PuppeteerService implements IScrapping {
       await page.setViewport({ width: 1080, height: 1024 });
       // await this.delay(2000);
 
-      await browser.close();
+      let breakfast;
+      let lunch;
+      let dinner;
+      try {
+        breakfast = await page.waitForSelector(
+          "table[class='refeicao desjejum'] > tbody"
+        );
+        lunch = await page.waitForSelector(
+          "table[class='refeicao almoco'] > tbody"
+        );
+        dinner = await page.waitForSelector(
+          "table[class='refeicao jantar'] > tbody"
+        );
+
+        if (breakfast != null) {
+         
+          let breakfastString = (await page.evaluate(
+            (el) => el?.textContent,
+            breakfast
+          )) as string;
+
+          let lunchString = (await page.evaluate(
+            (el) => el?.textContent,
+            lunch
+          )) as string;
+
+          let dinnerString = (await page.evaluate(
+            (el) => el?.textContent,
+            dinner
+          )) as string;
+
+      
+
+          await browser.close();
+          return {
+            breakfast:breakfastString,
+            lunch:lunchString,
+            dinner:dinnerString,
+            // lunch:{}
+          };
+          // return {
+          //   lunch: lunchString,
+          //   breakfast: breakfastString,
+          //   dinner: dinnerString,
+          // };
+        } else {
+          await browser.close();
+          throw new Error("Menu not available!");
+        }
+      } catch (error) {
+        await browser.close();
+        return {
+          error: "Menu isn't available today! :(",
+          lunch: {},
+          breakfast: {},
+          dinner: {},
+        };
+      }
     } catch (e) {
       await browser.close();
-      // return { error: e, name: "", credits: 0 };
+      return { error: e, lunch: {}, breakfast: {}, dinner: {} };
     }
   }
 }

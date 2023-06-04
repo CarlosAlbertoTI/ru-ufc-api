@@ -47,7 +47,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --only=production
+RUN npm install pm2@latest -g && npm install --only=production
+
 
 # Copy the source code
 COPY . .
@@ -60,4 +61,5 @@ ENV PORT=3000
 EXPOSE ${PORT}
 
 # Start the app
-CMD ["npm", "start"]
+# CMD ["npm", "start"]
+CMD ["pm2-runtime", "./dist/index.js"]

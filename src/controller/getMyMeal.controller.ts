@@ -25,3 +25,15 @@ export async function getMyMealTicket(req: Request, res: Response) {
 
   return res.status(200).json(result);
 }
+
+export async function getMenuOfTheDay(req: Request, res:Response){
+  const result = await puppeteerService.getMealOfTheDay()
+  if(result.error){
+    if(result.error == "Menu isn't available today! :("){
+      return res.status(200).json({data:result.error})
+    }else{    
+      return res.status(500).json({error:"Sorry!We had a error, please try later!"})
+    }
+  }
+  return res.status(200).json(result)
+}
