@@ -90,14 +90,14 @@ class PuppeteerService implements IScrapping {
 
   async getMealOfTheDay(): Promise<responseScrappingMealOfTheDay> {
     const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: "/usr/bin/google-chrome",
-      args: [
-        "--disable-gpu",
-        "--disable-dev-shm-usage",
-        "--disable-setuid-sandbox",
-        "--no-sandbox",
-      ],
+      headless: false,
+      // executablePath: "/usr/bin/google-chrome",
+      // args: [
+      //   "--disable-gpu",
+      //   "--disable-dev-shm-usage",
+      //   "--disable-setuid-sandbox",
+      //   "--no-sandbox",
+      // ],
     });
     try {
       const page = await browser.newPage();
@@ -165,10 +165,10 @@ class PuppeteerService implements IScrapping {
       } catch (error) {
         await browser.close();
         return {
-          error: "Menu isn't available today! :(",
-          lunch: {},
-          breakfast: {},
-          dinner: {},
+            error: "Menu isn't available today! :(",
+            lunch: undefined,
+            breakfast: undefined,
+            dinner: undefined
         };
       }
     } catch (e) {

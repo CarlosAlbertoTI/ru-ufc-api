@@ -30,7 +30,7 @@ export async function getMenuOfTheDay(req: Request, res:Response){
   const result = await puppeteerService.getMealOfTheDay()
   if(result.error){
     if(result.error == "Menu isn't available today! :("){
-      return res.status(200).json({data:result.error})
+      return res.status(200).json({error:result.error})
     }else{    
       return res.status(500).json({error:"Sorry!We had a error, please try later!"})
     }
