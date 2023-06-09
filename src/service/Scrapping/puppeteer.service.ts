@@ -6,7 +6,7 @@ import {
 } from "../../interface/IScrapping";
 
 class PuppeteerService implements IScrapping {
-  delay(time: number) {
+  _delay(time: number) {
     return new Promise(function (resolve) {
       setTimeout(resolve, time);
     });
@@ -61,7 +61,7 @@ class PuppeteerService implements IScrapping {
         return { error: "", name: "user not found", credits: 0 };
       }
 
-      await this.delay(2000);
+      await this._delay(2000);
 
       if (tableName != null || tableCredits != null) {
         let creditsString = (await page.evaluate(
@@ -89,17 +89,18 @@ class PuppeteerService implements IScrapping {
   }
 
   async getMealOfTheDay(): Promise<responseScrappingMealOfTheDay> {
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: "/usr/bin/google-chrome",
-      args: [
-        "--disable-gpu",
-        "--disable-dev-shm-usage",
-        "--disable-setuid-sandbox",
-        "--no-sandbox",
-      ],
-    });
+    let browser:any;
     try {
+      browser = await puppeteer.launch({
+        headless: true,
+        executablePath: "/usr/bin/google-chrome",
+        args: [
+          "--disable-gpu",
+          "--disable-dev-shm-usage",
+          "--disable-setuid-sandbox",
+          "--no-sandbox",
+        ],
+      });
       const page = await browser.newPage();
       await page.setDefaultNavigationTimeout(0);
       await page.goto(
@@ -128,29 +129,26 @@ class PuppeteerService implements IScrapping {
         );
 
         if (breakfast != null) {
-         
           let breakfastString = (await page.evaluate(
-            (el) => el?.textContent,
+            (el: { textContent: any; }) => el?.textContent,
             breakfast
           )) as string;
 
           let lunchString = (await page.evaluate(
-            (el) => el?.textContent,
+            (el: { textContent: any; }) => el?.textContent,
             lunch
           )) as string;
 
           let dinnerString = (await page.evaluate(
-            (el) => el?.textContent,
+            (el: { textContent: any; }) => el?.textContent,
             dinner
           )) as string;
 
-      
-
           await browser.close();
           return {
-            breakfast:breakfastString,
-            lunch:lunchString,
-            dinner:dinnerString,
+            breakfast: breakfastString,
+            lunch: lunchString,
+            dinner: dinnerString,
             // lunch:{}
           };
           // return {
@@ -159,20 +157,20 @@ class PuppeteerService implements IScrapping {
           //   dinner: dinnerString,
           // };
         } else {
-          await browser.close();
+          await browser?.close();
           throw new Error("Menu not available!");
         }
       } catch (error) {
-        await browser.close();
+        await browser?.close();
         return {
-            error: "Menu isn't available today! :(",
-            lunch: undefined,
-            breakfast: undefined,
-            dinner: undefined
+          error: "Menu isn't available today! :(",
+          lunch: undefined,
+          breakfast: undefined,
+          dinner: undefined,
         };
       }
     } catch (e) {
-      await browser.close();
+      await browser?.close();
       return { error: e, lunch: {}, breakfast: {}, dinner: {} };
     }
   }
