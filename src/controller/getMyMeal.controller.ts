@@ -49,7 +49,7 @@ export async function getMenuOfTheDay(req: Request, res: Response) {
       console.info("SCRAPPING");
 
       const result = await puppeteerService.getMealOfTheDay();
-
+      console.info(result)
       if (result.error) {
         if (result.error == "Menu isn't available today! :(") {
           return res.status(200).json({ error: result.error });
@@ -73,11 +73,13 @@ export async function getMenuOfTheDay(req: Request, res: Response) {
           .status(200)
           .json({ error: "Menu isn't available today! :(" });
       } else {
-        return {
+        return res
+        .status(200)
+        .json({
           lunch,
           breakfast,
           dinner,
-        };
+        })
       }
     }
   }
