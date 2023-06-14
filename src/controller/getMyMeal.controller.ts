@@ -15,12 +15,12 @@ const storage: ILocalStorage = new LocalStorage();
 export async function getMyMealTicket(req: Request, res: Response) {
   const { studentId, studentRuId } = req.query;
 
-  if (studentId?.length !== 6) {
-    return res.status(300).json({ error: "studentID invalid" });
-  }
-  if (studentRuId?.length !== 10) {
-    return res.status(300).json({ error: "studentRU ID invalid" });
-  }
+  // if (studentId?.length !== 6) {
+  //   return res.status(300).json({ error: "studentID invalid" });
+  // }
+  // if (studentRuId?.length !== 10) {
+  //   return res.status(300).json({ error: "studentRU ID invalid" });
+  // }
 
   const result = await puppeteerService.getMealTicket(
     String(studentId),
