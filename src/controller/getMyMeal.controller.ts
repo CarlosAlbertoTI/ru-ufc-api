@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import { differenceInDays, parseISO } from "date-fns";
 
-import { IScrapping } from "../interface/IScrapping";
+import {
+  IScrapping,
+  responseScrappingMealOfTheDay,
+} from "../interface/IScrapping";
 import { ILocalStorage } from "..//interface/ILocalStorage";
 
 import PuppeteerService from "../service/Scrapping/puppeteer.service";
@@ -45,14 +48,20 @@ export async function getMenuOfTheDay(req: Request, res: Response) {
   if (data !== undefined) {
     const { lunch, breakfast, dinner, time }: LocalStorageMealDTO = data;
 
-    if (differenceInDays(currentTime, parseISO(time)) >= 1) {
+    if (currentTime.getDate() - new Date(time).getDate()) {
       console.info("SCRAPPING");
 
-      const result = await puppeteerService.getMealOfTheDay();
-      console.info(result)
-      if (result.error) {
-        if (result.error == "Menu isn't available today! :(") {
-          return res.status(200).json({ error: result.error });
+      const {
+        breakfast: breakfastScrapping,
+        lunch: lunchScrapping,
+        dinner: dinnerScrapping,
+        error,
+      } = (await puppeteerService.getMealOfTheDay()) as responseScrappingMealOfTheDay;
+
+      if (error) {
+        storage.setData({ lunch, breakfast, dinner, time: currentTime });
+        if (error == "Menu isn't available today! :(") {
+          return res.status(200).json({ error: error });
         } else {
           return res
             .status(500)
@@ -60,27 +69,34 @@ export async function getMenuOfTheDay(req: Request, res: Response) {
         }
       }
 
-      storage.setData({ ...result, time: currentTime });
+      storage.setData({
+        breakfastScrapping,
+        lunchScrapping,
+        dinnerScrapping,
+        time: currentTime,
+      });
 
-      return res.status(200).json({ lunch, breakfast, dinner });
+      return res.status(200).json({ breakfastScrapping, lunchScrapping, dinnerScrapping });
     } else {
       console.info("DB");
-      if (lunch === "" || breakfast === "" || dinner === "") {
-        if (time === "") {
+      if (lunch == "" || breakfast == "" || dinner == "") {
+        if (time == "") {
           storage.setData({ lunch, breakfast, dinner, time: new Date() });
         }
         return res
           .status(200)
           .json({ error: "Menu isn't available today! :(" });
       } else {
-        return res
-        .status(200)
-        .json({
+        return res.status(200).json({
           lunch,
           breakfast,
           dinner,
-        })
+        });
       }
     }
+  }else{
+    return res
+            .status(500)
+            .json({ error: "Sorry!We had a error, please try later!" });
   }
 }
