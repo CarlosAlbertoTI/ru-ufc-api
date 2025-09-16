@@ -1,102 +1,128 @@
-import { Request, Response } from "express";
-import { differenceInDays, parseISO } from "date-fns";
+import { Request, Response, NextFunction } from "express";
+
 
 import {
   IScrapping,
   responseScrappingMealOfTheDay,
 } from "../interface/IScrapping";
-import { ILocalStorage } from "..//interface/ILocalStorage";
+import { ILocalStorage } from "../interface/ILocalStorage";
 
 import PuppeteerService from "../service/Scrapping/puppeteer.service";
 import { LocalStorage } from "../service/LocalStorage/localStorage";
 
 import { LocalStorageMealDTO } from "../DTO/Meal";
 
+import { Campus } from "../interface/ICampus";
+
+import { CAMPUSES } from "../utils/enums";
+
 const puppeteerService: IScrapping = new PuppeteerService();
 const storage: ILocalStorage = new LocalStorage();
 
-export async function getMyMealTicket(req: Request, res: Response) {
-  const { studentId, studentRuId } = req.query;
+export async function getMenuOfTheDay(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { city = "fortaleza" } = req.body;
 
-  // if (studentId?.length !== 6) {
-  //   return res.status(300).json({ error: "studentID invalid" });
-  // }
-  // if (studentRuId?.length !== 10) {
-  //   return res.status(300).json({ error: "studentRU ID invalid" });
-  // }
-
-  const result = await puppeteerService.getMealTicket(
-    String(studentId),
-    String(studentRuId)
-  );
-
-  if (result.error) {
-    return res.status(500).json(result.error);
-  }
-  if (result.name == "user not found") {
-    return res.status(404).json(result.name);
-  }
-
-  return res.status(200).json(result);
-}
-
-export async function getMenuOfTheDay(req: Request, res: Response) {
   const currentTime = new Date();
+  let currentCity;
   // request the data on db
   const data = await storage.getData();
 
   if (data !== undefined) {
-    const { lunch, breakfast, dinner, time }: LocalStorageMealDTO = data;
+    const {
+      fortaleza,
+      russas,
+      quixada,
+      sobral,
+      crateus,
+      itapaje,
+      cariri,
+    }: LocalStorageMealDTO = data;
 
-    if (currentTime.getDate() - new Date(time).getDate()) {
-      console.info("SCRAPPING");
+    const campus: Campus | undefined = CAMPUSES.find(
+      (campus: Campus) =>
+        campus.name.toLowerCase() === String(city).toLowerCase()
+    );
 
+    if (!campus) {
+      return next({ status: 400, error: "Invalid campus/city name" });
+    }
+
+    currentCity = {
+      url: campus.url,
+      data: data[campus.name.toLowerCase() as keyof LocalStorageMealDTO],
+    };
+
+    if (
+      currentTime.getDate() - new Date(currentCity.data.time).getDate() >= 1 ||
+      currentCity.data.time.length == 0
+    ) {
+      console.info("Fetching new data from the web...");
       const {
         breakfast: breakfastScrapping,
         lunch: lunchScrapping,
         dinner: dinnerScrapping,
         error,
-      } = (await puppeteerService.getMealOfTheDay()) as responseScrappingMealOfTheDay;
+      } = (await puppeteerService.getMealOfTheDay(
+        currentCity.url
+      )) as responseScrappingMealOfTheDay;
 
       if (error) {
-        storage.setData({ lunch, breakfast, dinner, time: currentTime });
-        if (error == "Menu isn't available today! :(") {
-          return res.status(200).json({ error: error });
+        if (error == "Não há cardápio cadastrado para este dia") {
+          return next({ status: 200, error });
         } else {
-          return res
-            .status(500)
-            .json({ error: "Sorry!We had a error, please try later!" });
+          return next({
+            status: 500,
+            error: "Sorry!We had a error, please try later!",
+          });
         }
       }
 
       storage.setData({
-        breakfastScrapping,
-        lunchScrapping,
-        dinnerScrapping,
-        time: currentTime,
+        ...data,
+        [`${city}`]: {
+          breakfast: breakfastScrapping,
+          lunch: lunchScrapping,
+          dinner: dinnerScrapping,
+          time: currentTime,
+        },
       });
 
-      return res.status(200).json({ breakfastScrapping, lunchScrapping, dinnerScrapping });
+      req.data = {
+        breakfast:
+          typeof breakfastScrapping === "string" ? breakfastScrapping : "",
+        lunch: typeof lunchScrapping === "string" ? lunchScrapping : "",
+        dinner: typeof dinnerScrapping === "string" ? dinnerScrapping : "",
+      };
+      return next();
     } else {
-      console.info("DB");
-      if (lunch == "" || breakfast == "" || dinner == "") {
-        if (time == "") {
-          storage.setData({ lunch, breakfast, dinner, time: new Date() });
-        }
-        return res
-          .status(200)
-          .json({ error: "Menu isn't available today! :(" });
+      console.info("Using cached data from the database...");
+      if (
+        currentCity.data.lunch == "" ||
+        currentCity.data.breakfast == "" ||
+        currentCity.data.dinner == ""
+      ) {
+        return next({ status: 200, error: "Menu isn't available today! :(" });
       } else {
-        return res.status(200).json({
-          lunch,
-          breakfast,
-          dinner,
-        });
+        req.data = {
+          breakfast:
+            data[campus.name.toLowerCase() as keyof LocalStorageMealDTO]
+              .breakfast,
+          lunch:
+            data[campus.name.toLowerCase() as keyof LocalStorageMealDTO].lunch,
+          dinner:
+            data[campus.name.toLowerCase() as keyof LocalStorageMealDTO].dinner,
+        };
+        return next();
       }
     }
-  }else{
-    return res
-            .status(500)
-            .json({ error: "Sorry!We had a error, please try later!" });
+  } else {
+    return next({
+      status: 500,
+      error: "Sorry!We had a error, please try later!",
+    });
   }
 }

@@ -1,9 +1,12 @@
-import {Router} from 'express'
-import { getMyMealTicket,getMenuOfTheDay } from '../controller/getMyMeal.controller'
+import { Router } from "express";
 
-const routes = Router()
+import { getMenuOfTheDay } from "../controller/getMyMeal.controller";
+import { getMyMealTicket, buyTickets } from "../controller/tickets.controller";
 
-routes.get('/getMyMealTickets', getMyMealTicket)
-routes.get('/getTodayMenu', getMenuOfTheDay)
+const routes = Router();
 
-export default routes
+routes.post("/getMyMealTickets", getMyMealTicket);
+routes.post("/getTodayMenu", getMenuOfTheDay);
+routes.post("/buyTickets", buyTickets);
+
+export default routes;
