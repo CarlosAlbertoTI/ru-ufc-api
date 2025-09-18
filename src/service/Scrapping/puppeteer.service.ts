@@ -21,13 +21,12 @@ class PuppeteerService implements IScrapping {
     const { studentId, studentRuId } = body;
 
     const browser = await puppeteer.launch({
-      executablePath:
-        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      executablePath: '/usr/bin/google-chrome',
       args: [
-        "--disable-gpu",
-        "--disable-dev-shm-usage",
-        "--disable-setuid-sandbox",
-        "--no-sandbox",
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-sandbox',
       ],
     });
     try {
@@ -118,13 +117,12 @@ class PuppeteerService implements IScrapping {
 
     try {
       browser = await puppeteer.launch({
-        executablePath:
-          "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        executablePath: '/usr/bin/google-chrome',
         args: [
-          "--disable-gpu",
-          "--disable-dev-shm-usage",
-          "--disable-setuid-sandbox",
-          "--no-sandbox",
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
+          '--no-sandbox',
         ],
       });
       const page = await browser.newPage();
@@ -236,13 +234,12 @@ class PuppeteerService implements IScrapping {
 
     try {
       browser = await puppeteer.launch({
-        executablePath:
-          "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        executablePath: '/usr/bin/google-chrome',
         args: [
-          "--disable-gpu",
-          "--disable-dev-shm-usage",
-          "--disable-setuid-sandbox",
-          "--no-sandbox",
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
+          '--no-sandbox',
         ],
       });
       const page = await browser.newPage();
