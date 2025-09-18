@@ -48,6 +48,7 @@ export async function getMenuOfTheDay(
     );
 
     if (!campus) {
+      console.error("Invalid campus/city name");
       return next({ status: 400, error: "Invalid campus/city name" });
     }
 
@@ -72,8 +73,10 @@ export async function getMenuOfTheDay(
 
       if (error) {
         if (error == "Não há cardápio cadastrado para este dia") {
+          console.info("No menu available for today");
           return next({ status: 200, error });
         } else {
+          console.error("Error fetching menu:", error);
           return next({
             status: 500,
             error: "Sorry!We had a error, please try later!",
