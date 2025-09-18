@@ -21,7 +21,6 @@ class PuppeteerService implements IScrapping {
     const { studentId, studentRuId } = body;
 
     const browser = await puppeteer.launch({
-      headless: false,
       executablePath:
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       args: [
@@ -119,7 +118,6 @@ class PuppeteerService implements IScrapping {
 
     try {
       browser = await puppeteer.launch({
-        headless: false,
         executablePath:
           "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
         args: [
