@@ -1,4 +1,5 @@
-import puppeteer, { Page, Browser } from "puppeteer";
+import chromium from 'chrome-aws-lambda';
+import puppeteer, { Page, Browser } from 'puppeteer-core';
 import {
   IScrapping,
   requestScrappingBuyTickets,
@@ -21,13 +22,11 @@ class PuppeteerService implements IScrapping {
     const { studentId, studentRuId } = body;
 
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/google-chrome',
-      args: [
-        '--disable-gpu',
-        '--disable-dev-shm-usage',
-        '--disable-setuid-sandbox',
-        '--no-sandbox',
-      ],
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
     try {
       const page = await browser.newPage();
@@ -117,13 +116,11 @@ class PuppeteerService implements IScrapping {
 
     try {
       browser = await puppeteer.launch({
-        executablePath: '/usr/bin/google-chrome',
-        args: [
-          '--disable-gpu',
-          '--disable-dev-shm-usage',
-          '--disable-setuid-sandbox',
-          '--no-sandbox',
-        ],
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath,
+        headless: chromium.headless,
+        ignoreHTTPSErrors: true,
       });
       const page = await browser.newPage();
       await page.setDefaultNavigationTimeout(0);
@@ -234,13 +231,11 @@ class PuppeteerService implements IScrapping {
 
     try {
       browser = await puppeteer.launch({
-        executablePath: '/usr/bin/google-chrome',
-        args: [
-          '--disable-gpu',
-          '--disable-dev-shm-usage',
-          '--disable-setuid-sandbox',
-          '--no-sandbox',
-        ],
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath,
+        headless: chromium.headless,
+        ignoreHTTPSErrors: true,
       });
       const page = await browser.newPage();
       await page.setDefaultNavigationTimeout(0);
